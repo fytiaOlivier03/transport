@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Mission')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">
+            <span th:text="${mission.numero}">N°</span>
+            <span th:replace="~{fragments/layout :: badge(${mission.statut})}"></span>
+        </h3>
+        <a class="btn btn-outline-secondary" th:href="@{/missions}">← Retour</a>
+    </div>
+
+    <div class="row g-3">
+        <!-- Informations -->
+        <div class="col-lg-7">
+            <div class="card p-3 h-100">
+                <h5>Informations</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Type</dt><dd class="col-sm-8" th:text="${mission.type}">T</dd>
+                    <dt class="col-sm-4">Client</dt><dd class="col-sm-8" th:text="${mission.clientNom}">C</dd>
+                    <dt class="col-sm-4">Départ</dt><dd class="col-sm-8" th:text="${mission.adresseDepart}">A</dd>
+                    <dt class="col-sm-4">Destination</dt><dd class="col-sm-8" th:text="${mission.adresseDestination}">B</dd>
+                    <dt class="col-sm-4">Zone</dt><dd class="col-sm-8" th:text="${mission.zone} ?: '-'">Z</dd>
+                    <dt class="col-sm-4">Distance</dt><dd class="col-sm-8"><span th:text="${mission.distanceKm}">0</span> km</dd>
+                    <dt class="col-sm-4" th:if="${mission.type.name() == 'LIVRAISON'}">Colis</dt>
+                    <dd class="col-sm-8" th:if="${mission.type.name() == 'LIVRAISON'}">
+                        <span th:text="${mission.poids}">0</span> kg
+                        <span th:if="${mission.volume != null}">· <span th:text="${mission.volume}">0</span> m³</span>
+                    </dd>
+                    <dt class="col-sm-4" th:if="${mission.type.name() == 'COURSE'}">Passagers</dt>
+                    <dd class="col-sm-8" th:if="${mission.type.name() == 'COURSE'}" th:text="${mission.nombrePassagers}">1</dd>
+                    <dt class="col-sm-4">Priorité</dt><dd class="col-sm-8" th:text="${mission.priorite}">P</dd>
+                    <dt class="col-sm-4">Date prévue</dt>
+                    <dd class="col-sm-8" th:text="${#temporals.format(mission.datePrevue, 'dd/MM/yyyy HH:mm')}">D</dd>
+                    <dt class="col-sm-4">Prix</dt>
+                    <dd class="col-sm-8"><strong th:text="${#numbers.formatDecimal(mission.prix, 0, 'WHITESPACE', 0, 'POINT')}">0</strong> Ar</dd>
+                    <dt class="col-sm-4" th:if="${mission.commission != null}">Commission</dt>
+                    <dd class="col-sm-8" th:if="${mission.commission != null}">
+                        <span th:text="${#numbers.formatDecimal(mission.commission, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</dd>
+                    <dt class="col-sm-4">Chauffeur</dt>
+                    <dd class="col-sm-8"><span th:text="${mission.chauffeurNom} ?: '-'">-</span>
+                        <span th:if="${mission.vehiculeImmatriculation != null}" class="text-muted">
+                            (<span th:text="${mission.vehiculeImmatriculation}">V</span>)</span></dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Suivi -->
+        <div class="col-lg-5">
+            <div class="card p-3 h-100">
+                <h5>Suivi</h5>
+                <ul class="list-unstyled mb-0">
+                    <li><i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Créée : <span th:text="${#temporals.format(mission.dateCreation, 'dd/MM/yyyy HH:mm')}">-</span></li>
+                    <li th:if="${mission.dateAssignation != null}"><i class="bi bi-person-check me-1" aria-hidden="true"></i>Attribuée : <span th:text="${#temporals.format(mission.dateAssignation, 'dd/MM/yyyy HH:mm')}">-</span></li>
+                    <li th:if="${mission.dateDebut != null}"><i class="bi bi-play-circle me-1" aria-hidden="true"></i>Démarrée : <span th:text="${#temporals.format(mission.dateDebut, 'dd/MM/yyyy HH:mm')}">-</span></li>
+                    <li th:if="${mission.dateFin != null}"><i class="bi bi-flag me-1" aria-hidden="true"></i>Clôturée : <span th:text="${#temporals.format(mission.dateFin, 'dd/MM/yyyy HH:mm')}">-</span></li>
+                </ul>
+                <div th:if="${mission.preuve != null}" class="mt-3">
+                    <h6>Preuve de livraison</h6>
+                    <div>Réceptionnaire : <span th:text="${mission.preuve.nomReceptionnaire}">-</span></div>
+                    <div>Code : <span th:text="${mission.preuve.codeConfirmation}">-</span></div>
+                    <div th:if="${mission.preuve.commentaire != null}" th:text="${mission.preuve.commentaire}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card p-3 mt-3" sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')"
+         th:unless="${mission.statut.name() == 'TERMINEE' or mission.statut.name() == 'RETOURNEE'}">
+        <h5>Actions</h5>
+        <div class="d-flex flex-wrap gap-2 align-items-start">
+
+            <!-- CREEE -->
+            <th:block th:if="${mission.statut.name() == 'CREEE'}">
+                <form th:action="@{/missions/{id}/assign-auto(id=${mission.id})}" method="post">
+                    <button class="btn btn-primary">Attribuer automatiquement</button></form>
+                <a class="btn btn-outline-primary" th:href="@{/missions/{id}/edit(id=${mission.id})}">Modifier</a>
+            </th:block>
+
+            <!-- ASSIGNEE -->
+            <form th:if="${mission.statut.name() == 'ASSIGNEE'}" th:action="@{/missions/{id}/pickup(id=${mission.id})}" method="post">
+                <button class="btn btn-primary" th:text="${mission.type.name() == 'COURSE'} ? 'Client pris en charge' : 'Colis récupéré'">Prise en charge</button></form>
+
+            <!-- PRISE_EN_CHARGE -->
+            <form th:if="${mission.statut.name() == 'PRISE_EN_CHARGE'}" th:action="@{/missions/{id}/start(id=${mission.id})}" method="post">
+                <button class="btn btn-primary" th:text="${mission.type.name() == 'COURSE'} ? 'Démarrer la course' : 'Démarrer la livraison'">Démarrer</button></form>
+
+            <!-- ECHEC (livraison) -->
+            <form th:if="${mission.statut.name() == 'ECHEC' and mission.type.name() == 'LIVRAISON'}"
+                  th:action="@{/missions/{id}/return(id=${mission.id})}" method="post">
+                <button class="btn btn-warning">Retourner à l'expéditeur</button></form>
+
+            <!-- Annulation -->
+            <form th:if="${mission.statut.name() == 'CREEE' or mission.statut.name() == 'ASSIGNEE' or mission.statut.name() == 'PRISE_EN_CHARGE'}"
+                  th:action="@{/missions/{id}/cancel(id=${mission.id})}" method="post"
+                  onsubmit="return confirm('Annuler cette mission ?');">
+                <button class="btn btn-outline-danger">Annuler</button></form>
+        </div>
+
+        <!-- Cloture (EN_COURS) -->
+        <form class="row g-2 mt-2" th:if="${mission.statut.name() == 'EN_COURS'}"
+              th:action="@{/missions/{id}/complete(id=${mission.id})}" method="post">
+            <th:block th:if="${mission.type.name() == 'LIVRAISON'}">
+                <div class="col-md-4"><input class="form-control" name="nomReceptionnaire" placeholder="Nom du réceptionnaire *" required></div>
+                <div class="col-md-3"><input class="form-control" name="codeConfirmation" placeholder="Code de confirmation *" required></div>
+                <div class="col-md-3"><input class="form-control" name="commentaire" placeholder="Commentaire"></div>
+            </th:block>
+            <div class="col-md-2"><button class="btn btn-success w-100"
+                 th:text="${mission.type.name() == 'COURSE'} ? 'Terminer la course' : 'Confirmer la livraison'">Terminer</button></div>
+        </form>
+
+        <!-- Echec (PRISE_EN_CHARGE ou EN_COURS) -->
+        <form class="row g-2 mt-2" th:if="${mission.statut.name() == 'PRISE_EN_CHARGE' or mission.statut.name() == 'EN_COURS'}"
+              th:action="@{/missions/{id}/fail(id=${mission.id})}" method="post">
+            <div class="col-md-3"><select class="form-select" name="type">
+                <option th:each="t : ${typesIncident}" th:value="${t}" th:text="${t}"></option></select></div>
+            <div class="col-md-6"><input class="form-control" name="description" placeholder="Motif de l'échec *" required></div>
+            <div class="col-md-3"><button class="btn btn-outline-danger w-100">Déclarer un échec</button></div>
+        </form>
+
+        <!-- Suppression -->
+        <form class="mt-2" sec:authorize="hasAnyRole('ADMIN','MANAGER')"
+              th:if="${mission.statut.name() == 'CREEE' or mission.statut.name() == 'ANNULEE'}"
+              th:action="@{/missions/{id}/delete(id=${mission.id})}" method="post"
+              onsubmit="return confirm('Supprimer définitivement cette mission ?');">
+            <button class="btn btn-sm btn-danger">Supprimer la mission</button></form>
+    </div>
+
+    <!-- Candidats (attribution manuelle) -->
+    <div class="card p-3 mt-3" th:if="${mission.statut.name() == 'CREEE'}">
+        <h5>Chauffeurs éligibles (classés par score)</h5>
+        <p class="text-muted mb-0" th:if="${candidats.isEmpty()}">
+            Aucun chauffeur éligible : disponibilité, permis valide, véhicule disponible et capacité suffisante sont requis.</p>
+        <table class="table table-sm align-middle mb-0" th:unless="${candidats.isEmpty()}">
+            <thead><tr><th>Chauffeur</th><th>Véhicule</th><th>Zone</th><th>Distance (km)</th><th>Missions du jour</th><th>Score</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${candidats}">
+                <td th:text="${c.chauffeur}">N</td>
+                <td th:text="${c.vehicule}">V</td>
+                <td th:text="${c.zone} ?: '-'">Z</td>
+                <td th:text="${c.distanceKm} ?: '-'">-</td>
+                <td th:text="${c.missionsDuJour}">0</td>
+                <td><strong th:text="${c.score}">0</strong></td>
+                <td sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">
+                    <form th:action="@{/missions/{id}/assign(id=${mission.id})}" method="post">
+                        <input type="hidden" name="chauffeurId" th:value="${c.chauffeurId}">
+                        <button class="btn btn-sm btn-outline-primary">Attribuer</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Incidents -->
+    <div class="card p-3 mt-3 mb-4">
+        <h5>Incidents</h5>
+        <p class="text-muted" th:if="${incidents.isEmpty()}">Aucun incident signalé.</p>
+        <table class="table table-sm align-middle" th:unless="${incidents.isEmpty()}">
+            <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Résolution</th></tr></thead>
+            <tbody>
+            <tr th:each="i : ${incidents}">
+                <td th:text="${#temporals.format(i.dateIncident, 'dd/MM/yyyy HH:mm')}">date</td>
+                <td th:text="${i.type}">T</td>
+                <td th:text="${i.description}">D</td>
+                <td>
+                    <span th:if="${i.resolu}" th:text="${i.resolution}" class="text-success">ok</span>
+                    <form th:unless="${i.resolu}" sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')"
+                          class="d-flex gap-1" th:action="@{/missions/incidents/{iid}/resolve(iid=${i.id})}" method="post">
+                        <input type="hidden" name="missionId" th:value="${mission.id}">
+                        <input class="form-control form-control-sm" name="resolution" placeholder="Résolution" required>
+                        <button class="btn btn-sm btn-outline-success">Résoudre</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <form class="row g-2" sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')"
+              th:if="${mission.statut.name() == 'ASSIGNEE' or mission.statut.name() == 'PRISE_EN_CHARGE' or mission.statut.name() == 'EN_COURS' or mission.statut.name() == 'ECHEC'}"
+              th:action="@{/missions/{id}/incidents(id=${mission.id})}" method="post">
+            <div class="col-md-3"><select class="form-select" name="type">
+                <option th:each="t : ${typesIncident}" th:value="${t}" th:text="${t}"></option></select></div>
+            <div class="col-md-7"><input class="form-control" name="description" placeholder="Décrire l'incident *" required></div>
+            <div class="col-md-2"><button class="btn btn-outline-warning w-100">Signaler</button></div>
+        </form>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

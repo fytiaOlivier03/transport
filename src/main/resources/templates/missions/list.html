@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Missions')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container-fluid px-4">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Missions (courses &amp; livraisons)</h3>
+        <a class="btn btn-primary" th:href="@{/missions/new}" sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">+ Nouvelle mission</a>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/missions}">
+        <div class="col-md-3"><input class="form-control" name="q" th:value="${q}" placeholder="N°, client, adresse..."></div>
+        <div class="col-md-2">
+            <select class="form-select" name="type">
+                <option value="">Tous types</option>
+                <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${t == type}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="statut">
+                <option value="">Tous statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}" th:selected="${s == statut}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="priorite">
+                <option value="">Toutes priorités</option>
+                <option th:each="p : ${priorites}" th:value="${p}" th:text="${p}" th:selected="${p == priorite}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="sort">
+                <option value="id,desc" th:selected="${sort == 'id,desc'}">Plus récentes</option>
+                <option value="datePrevue,asc" th:selected="${sort == 'datePrevue,asc'}">Date prévue ↑</option>
+                <option value="datePrevue,desc" th:selected="${sort == 'datePrevue,desc'}">Date prévue ↓</option>
+                <option value="prix,desc" th:selected="${sort == 'prix,desc'}">Prix décroissant</option>
+            </select>
+        </div>
+        <div class="col-md-1"><button class="btn btn-outline-secondary w-100">OK</button></div>
+    </form>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>N°</th><th>Type</th><th>Client</th><th>Trajet</th><th>Date prévue</th><th>Priorité</th><th>Prix (Ar)</th><th>Chauffeur</th><th>Statut</th></tr></thead>
+                <tbody>
+                <tr th:each="m : ${page.content}">
+                    <td><a th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.numero}">N°</a></td>
+                    <td th:text="${m.type}">Type</td>
+                    <td th:text="${m.clientNom}">Client</td>
+                    <td><span th:text="${m.adresseDepart}">A</span> → <span th:text="${m.adresseDestination}">B</span></td>
+                    <td th:text="${#temporals.format(m.datePrevue, 'dd/MM/yyyy HH:mm')}">date</td>
+                    <td th:text="${m.priorite}">P</td>
+                    <td th:text="${#numbers.formatDecimal(m.prix, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+                    <td th:text="${m.chauffeurNom} ?: '-'">-</td>
+                    <td><span th:replace="~{fragments/layout :: badge(${m.statut})}"></span></td>
+                </tr>
+                <tr th:if="${page.empty}"><td colspan="9" class="text-center text-muted py-4">Aucune mission</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="text-muted small mt-2"><span th:text="${page.totalElements}">0</span> résultat(s)</p>
+    <nav th:replace="~{fragments/layout :: pagination(${page}, '/missions', ${query})}"></nav>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

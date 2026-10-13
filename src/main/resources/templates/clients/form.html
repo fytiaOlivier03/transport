@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Client')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container" style="max-width: 700px;">
+    <h3 th:text="${id == null} ? 'Nouveau client' : 'Modifier le client'">Client</h3>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <form class="card p-4 row g-3 mx-0" method="post" th:object="${client}"
+          th:action="${id == null} ? @{/clients} : @{/clients/{id}(id=${id})}">
+        <div class="col-md-6">
+            <label class="form-label">Nom *</label>
+            <input class="form-control" th:field="*{nom}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{nom}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Prénom</label>
+            <input class="form-control" th:field="*{prenom}">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Téléphone *</label>
+            <input class="form-control" th:field="*{telephone}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{telephone}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input class="form-control" th:field="*{email}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{email}"></div>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Adresse</label>
+            <input class="form-control" th:field="*{adresse}">
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Enregistrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/clients}">Annuler</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

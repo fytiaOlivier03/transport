@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Erreur')}"></head>
+<body>
+<div class="container py-5 text-center">
+    <h1 class="display-4" th:text="${status}">500</h1>
+    <h4 th:text="${error}">Erreur</h4>
+    <p class="text-muted" th:text="${message}">Message</p>
+    <a class="btn btn-primary" th:href="@{/}">Retour à l'accueil</a>
+</div>
+</body>
+</html>

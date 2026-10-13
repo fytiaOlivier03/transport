@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Chauffeur')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container" style="max-width: 800px;">
+    <h3 th:text="${id == null} ? 'Nouveau chauffeur' : 'Modifier le chauffeur'">Chauffeur</h3>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <form class="card p-4 row g-3 mx-0" method="post" th:object="${chauffeur}"
+          th:action="${id == null} ? @{/chauffeurs} : @{/chauffeurs/{id}(id=${id})}">
+        <div class="col-md-6">
+            <label class="form-label">Nom *</label>
+            <input class="form-control" th:field="*{nom}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{nom}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Prénoms *</label>
+            <input class="form-control" th:field="*{prenom}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{prenom}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Téléphone *</label>
+            <input class="form-control" th:field="*{telephone}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{telephone}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Zone</label>
+            <input class="form-control" th:field="*{zone}" placeholder="Centre, Nord, Sud...">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">N° de permis *</label>
+            <input class="form-control" th:field="*{numeroPermis}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{numeroPermis}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Expiration du permis *</label>
+            <input class="form-control" type="date" th:field="*{dateExpirationPermis}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{dateExpirationPermis}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Date d'embauche</label>
+            <input class="form-control" type="date" th:field="*{dateEmbauche}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{dateEmbauche}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Véhicule associé</label>
+            <select class="form-select" th:field="*{vehiculeId}">
+                <option value="">— Aucun —</option>
+                <option th:each="v : ${vehicules}" th:value="${v.id}"
+                        th:text="${v.immatriculation + ' - ' + v.marque + ' ' + v.modele}"></option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Latitude (position)</label>
+            <input class="form-control" type="number" step="any" th:field="*{latitude}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{latitude}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Longitude (position)</label>
+            <input class="form-control" type="number" step="any" th:field="*{longitude}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{longitude}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Statut</label>
+            <select class="form-select" th:field="*{statut}">
+                <option th:each="s : ${statutsManuels}" th:value="${s}" th:text="${s}"></option>
+            </select>
+            <div class="form-text">EN_COURSE / EN_LIVRAISON sont gérés automatiquement par les missions.</div>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Enregistrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/chauffeurs}">Annuler</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

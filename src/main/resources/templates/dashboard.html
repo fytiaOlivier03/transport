@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Tableau de bord')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <h3 class="mb-3">Tableau de bord</h3>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3"><div class="card stat-card p-3">
+            <div class="text-muted">Chauffeurs disponibles</div>
+            <div class="display-6"><span th:text="${stats.chauffeursDisponibles}">0</span>
+                <small class="fs-6 text-muted">/ <span th:text="${stats.chauffeursTotal}">0</span></small></div>
+        </div></div>
+        <div class="col-6 col-md-3"><div class="card stat-card p-3">
+            <div class="text-muted">Véhicules disponibles</div>
+            <div class="display-6"><span th:text="${stats.vehiculesDisponibles}">0</span>
+                <small class="fs-6 text-muted">/ <span th:text="${stats.vehiculesTotal}">0</span></small></div>
+        </div></div>
+        <div class="col-6 col-md-3"><div class="card stat-card p-3">
+            <div class="text-muted">Missions en attente</div>
+            <div class="display-6" th:text="${stats.missionsEnAttente}">0</div>
+        </div></div>
+        <div class="col-6 col-md-3"><div class="card stat-card p-3">
+            <div class="text-muted">Missions en cours</div>
+            <div class="display-6" th:text="${stats.missionsEnCours}">0</div>
+        </div></div>
+        <div class="col-md-6"><div class="card stat-card p-3">
+            <div class="text-muted">Missions terminées aujourd'hui</div>
+            <div class="display-6" th:text="${stats.missionsTermineesAujourdhui}">0</div>
+        </div></div>
+        <div class="col-md-6"><div class="card stat-card p-3">
+            <div class="text-muted">Chiffre d'affaires du jour</div>
+            <div class="display-6"><span th:text="${#numbers.formatDecimal(stats.chiffreAffairesAujourdhui, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</div>
+        </div></div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card p-3">
+                <h5>Missions en attente d'attribution</h5>
+                <p class="text-muted" th:if="${enAttente.isEmpty()}">Aucune mission en attente.</p>
+                <table class="table table-sm align-middle" th:unless="${enAttente.isEmpty()}">
+                    <thead><tr><th>N°</th><th>Type</th><th>Départ</th><th>Priorité</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="m : ${enAttente}">
+                        <td><a th:href="@{/missions/{id}(id=${m.id})}" th:text="${m.numero}">N°</a></td>
+                        <td th:text="${m.type}">T</td>
+                        <td th:text="${m.adresseDepart}">D</td>
+                        <td th:text="${m.priorite}">P</td>
+                        <td sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">
+                            <form th:action="@{/missions/{id}/assign-auto(id=${m.id})}" method="post">
+                                <button class="btn btn-sm btn-primary">Attribuer (auto)</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card p-3">
+                <h5>Chauffeurs disponibles</h5>
+                <p class="text-muted" th:if="${disponibles.isEmpty()}">Aucun chauffeur disponible.</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between" th:each="c : ${disponibles}">
+                        <span th:text="${c.prenom + ' ' + c.nom}">Nom</span>
+                        <span class="text-muted" th:text="${c.zone} ?: '-'">Zone</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

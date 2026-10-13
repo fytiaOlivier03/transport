@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Paramètres')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container" style="max-width: 900px;">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <h3 class="mb-1">Paramètres</h3>
+    <p class="text-muted">Tarifs, commission et coefficients du score d'attribution (réservé à l'administrateur).</p>
+    <div class="card">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Paramètre</th><th>Description</th><th style="width: 260px;">Valeur</th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${parametres}">
+                <td><code th:text="${p.cle}">cle</code></td>
+                <td th:text="${p.description}">desc</td>
+                <td>
+                    <form class="d-flex gap-2" th:action="@{/parametres}" method="post">
+                        <input type="hidden" name="cle" th:value="${p.cle}">
+                        <input class="form-control form-control-sm" name="valeur" th:value="${p.valeur}" required>
+                        <button class="btn btn-sm btn-primary">OK</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

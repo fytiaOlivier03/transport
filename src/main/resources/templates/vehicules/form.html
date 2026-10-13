@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Véhicule')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container" style="max-width: 800px;">
+    <h3 th:text="${id == null} ? 'Nouveau véhicule' : 'Modifier le véhicule'">Véhicule</h3>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <form class="card p-4 row g-3 mx-0" method="post" th:object="${vehicule}"
+          th:action="${id == null} ? @{/vehicules} : @{/vehicules/{id}(id=${id})}">
+        <div class="col-md-6">
+            <label class="form-label">Immatriculation *</label>
+            <input class="form-control" th:field="*{immatriculation}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{immatriculation}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Année</label>
+            <input class="form-control" type="number" th:field="*{annee}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{annee}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Marque *</label>
+            <input class="form-control" th:field="*{marque}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{marque}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Modèle *</label>
+            <input class="form-control" th:field="*{modele}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{modele}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Nombre de places *</label>
+            <input class="form-control" type="number" th:field="*{capacitePlaces}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{capacitePlaces}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Charge max (kg) *</label>
+            <input class="form-control" type="number" step="any" th:field="*{capaciteKg}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{capaciteKg}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Kilométrage</label>
+            <input class="form-control" type="number" step="any" th:field="*{kilometrage}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{kilometrage}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Statut</label>
+            <select class="form-select" th:field="*{statut}">
+                <option th:each="s : ${statutsManuels}" th:value="${s}" th:text="${s}"></option>
+            </select>
+            <div class="form-text">EN_COURSE / EN_LIVRAISON sont gérés automatiquement par les missions.</div>
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Enregistrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/vehicules}">Annuler</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

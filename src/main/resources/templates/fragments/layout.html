@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' - Transport'">Transport</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}"><i class="bi bi-taxi-front-fill me-1" aria-hidden="true"></i>Transport &amp; Livraison</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/}">Tableau de bord</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/missions}">Missions</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/chauffeurs}">Chauffeurs</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/vehicules}">Véhicules</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/clients}">Clients</a></li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+                    <a class="nav-link" th:href="@{/statistiques}">Statistiques</a></li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:href="@{/parametres}">Paramètres</a></li>
+            </ul>
+            <span class="navbar-text me-3">
+                <span sec:authentication="name">user</span>
+                (<span sec:authentication="principal.authorities">ROLE</span>)
+            </span>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button class="btn btn-outline-light btn-sm" type="submit">Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div th:fragment="flash">
+    <div class="alert alert-success alert-dismissible fade show" th:if="${success}">
+        <span th:text="${success}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show" th:if="${error}">
+        <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<nav th:fragment="pagination(page, url, query)" th:if="${page.totalPages > 1}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+            <a class="page-link" th:href="${url + '?' + query + 'page=' + (page.number - 1)}">«</a></li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+            th:classappend="${i == page.number} ? 'active'">
+            <a class="page-link" th:href="${url + '?' + query + 'page=' + i}" th:text="${i + 1}">1</a></li>
+        <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+            <a class="page-link" th:href="${url + '?' + query + 'page=' + (page.number + 1)}">»</a></li>
+    </ul>
+</nav>
+
+<span th:fragment="badge(s)" class="badge" th:with="n=${s.name()}"
+      th:classappend="${n == 'DISPONIBLE' or n == 'TERMINEE'} ? 'bg-success' : (${n == 'SUSPENDU' or n == 'HORS_SERVICE' or n == 'ANNULEE' or n == 'ECHEC' or n == 'RETOURNEE'} ? 'bg-danger' : (${n == 'MAINTENANCE' or n == 'EN_PAUSE' or n == 'INDISPONIBLE'} ? 'bg-warning text-dark' : (${n == 'CREEE'} ? 'bg-secondary' : 'bg-primary')))"
+      th:text="${n}">STATUT</span>
+
+</body>
+</html>

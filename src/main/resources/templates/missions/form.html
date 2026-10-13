@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Mission')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container" style="max-width: 900px;">
+    <h3 th:text="${id == null} ? 'Nouvelle mission' : 'Modifier la mission'">Mission</h3>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <form class="card p-4 row g-3 mx-0" method="post" th:object="${mission}"
+          th:action="${id == null} ? @{/missions} : @{/missions/{id}(id=${id})}">
+        <div class="col-md-4">
+            <label class="form-label">Type *</label>
+            <select class="form-select" th:field="*{type}" th:errorclass="is-invalid">
+                <option value="">— Choisir —</option>
+                <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+            </select>
+            <div class="invalid-feedback" th:errors="*{type}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Client *</label>
+            <select class="form-select" th:field="*{clientId}" th:errorclass="is-invalid">
+                <option value="">— Choisir —</option>
+                <option th:each="c : ${clients}" th:value="${c.id}"
+                        th:text="${(c.prenom != null ? c.prenom + ' ' : '') + c.nom}"></option>
+            </select>
+            <div class="invalid-feedback" th:errors="*{clientId}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Priorité</label>
+            <select class="form-select" th:field="*{priorite}">
+                <option th:each="p : ${priorites}" th:value="${p}" th:text="${p}"></option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Adresse de départ / d'enlèvement *</label>
+            <input class="form-control" th:field="*{adresseDepart}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{adresseDepart}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Adresse de destination / de livraison *</label>
+            <input class="form-control" th:field="*{adresseDestination}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{adresseDestination}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Zone de départ</label>
+            <input class="form-control" th:field="*{zone}" placeholder="Centre, Nord, Sud...">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Distance (km) *</label>
+            <input class="form-control" type="number" step="any" th:field="*{distanceKm}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{distanceKm}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Date et heure prévues *</label>
+            <input class="form-control" type="datetime-local" th:field="*{datePrevue}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{datePrevue}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Passagers <small class="text-muted">(course)</small></label>
+            <input class="form-control" type="number" th:field="*{nombrePassagers}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{nombrePassagers}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Poids en kg <small class="text-muted">(livraison, obligatoire)</small></label>
+            <input class="form-control" type="number" step="any" th:field="*{poids}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{poids}"></div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Volume en m³ <small class="text-muted">(livraison)</small></label>
+            <input class="form-control" type="number" step="any" th:field="*{volume}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{volume}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Latitude du départ <small class="text-muted">(optionnel, améliore l'attribution)</small></label>
+            <input class="form-control" type="number" step="any" th:field="*{latDepart}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{latDepart}"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Longitude du départ</label>
+            <input class="form-control" type="number" step="any" th:field="*{lngDepart}" th:errorclass="is-invalid">
+            <div class="invalid-feedback" th:errors="*{lngDepart}"></div>
+        </div>
+        <div class="col-12 form-text">Le prix est calculé automatiquement (tarifs configurables, majoration selon la priorité).</div>
+        <div class="col-12 d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Enregistrer</button>
+            <a class="btn btn-outline-secondary" th:href="@{/missions}">Annuler</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

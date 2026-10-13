@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Statistiques')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container">
+    <h3 class="mb-3">Statistiques</h3>
+
+    <form class="row g-2 mb-4" method="get" th:action="@{/statistiques}">
+        <div class="col-md-3"><label class="form-label">Du</label>
+            <input class="form-control" type="date" name="from" th:value="${from}"></div>
+        <div class="col-md-3"><label class="form-label">Au</label>
+            <input class="form-control" type="date" name="to" th:value="${to}"></div>
+        <div class="col-md-3"><label class="form-label">Type</label>
+            <select class="form-select" name="type">
+                <option value="">Courses + livraisons</option>
+                <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${t == type}"></option>
+            </select></div>
+        <div class="col-md-3 d-flex align-items-end"><button class="btn btn-primary w-100">Appliquer</button></div>
+    </form>
+
+    <h5>Revenus</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Chiffre d'affaires</div>
+            <div class="fs-4 fw-bold"><span th:text="${#numbers.formatDecimal(revenu.chiffreAffaires, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Commission</div>
+            <div class="fs-4 fw-bold"><span th:text="${#numbers.formatDecimal(revenu.commissionTotale, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Net chauffeurs</div>
+            <div class="fs-4 fw-bold"><span th:text="${#numbers.formatDecimal(revenu.revenuNetChauffeurs, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Revenu moyen / mission</div>
+            <div class="fs-4 fw-bold"><span th:text="${#numbers.formatDecimal(revenu.revenuMoyenParMission, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</div></div></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6"><div class="card p-3"><h6>Revenu par chauffeur (net de commission)</h6>
+            <table class="table table-sm mb-0"><tbody>
+                <tr th:each="e : ${revenu.revenuParChauffeur}"><td th:text="${e.key}">N</td>
+                    <td class="text-end"><span th:text="${#numbers.formatDecimal(e.value, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</td></tr>
+                <tr th:if="${revenu.revenuParChauffeur.isEmpty()}"><td class="text-muted">Aucune donnée</td></tr>
+            </tbody></table></div></div>
+        <div class="col-md-6"><div class="card p-3"><h6>Revenu par véhicule (brut)</h6>
+            <table class="table table-sm mb-0"><tbody>
+                <tr th:each="e : ${revenu.revenuParVehicule}"><td th:text="${e.key}">V</td>
+                    <td class="text-end"><span th:text="${#numbers.formatDecimal(e.value, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</td></tr>
+                <tr th:if="${revenu.revenuParVehicule.isEmpty()}"><td class="text-muted">Aucune donnée</td></tr>
+            </tbody></table></div></div>
+        <div class="col-md-6"><div class="card p-3"><h6>Revenu quotidien</h6>
+            <table class="table table-sm mb-0"><tbody>
+                <tr th:each="e : ${revenu.revenuQuotidien}"><td th:text="${e.key}">J</td>
+                    <td class="text-end"><span th:text="${#numbers.formatDecimal(e.value, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</td></tr>
+                <tr th:if="${revenu.revenuQuotidien.isEmpty()}"><td class="text-muted">Aucune donnée</td></tr>
+            </tbody></table></div></div>
+        <div class="col-md-6"><div class="card p-3"><h6>Revenu mensuel</h6>
+            <table class="table table-sm mb-0"><tbody>
+                <tr th:each="e : ${revenu.revenuMensuel}"><td th:text="${e.key}">M</td>
+                    <td class="text-end"><span th:text="${#numbers.formatDecimal(e.value, 0, 'WHITESPACE', 0, 'POINT')}">0</span> Ar</td></tr>
+                <tr th:if="${revenu.revenuMensuel.isEmpty()}"><td class="text-muted">Aucune donnée</td></tr>
+            </tbody></table></div></div>
+    </div>
+
+    <h5>Activité</h5>
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Missions</div>
+            <div class="fs-4 fw-bold" th:text="${activite.nombreMissions}">0</div>
+            <small class="text-muted"><span th:text="${activite.nombreCourses}">0</span> courses · <span th:text="${activite.nombreLivraisons}">0</span> livraisons</small></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Taux de réussite</div>
+            <div class="fs-4 fw-bold"><span th:text="${activite.tauxReussite}">0</span> %</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Taux d'échec</div>
+            <div class="fs-4 fw-bold"><span th:text="${activite.tauxEchec}">0</span> %</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Taux d'annulation</div>
+            <div class="fs-4 fw-bold"><span th:text="${activite.tauxAnnulation}">0</span> %</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Distance totale</div>
+            <div class="fs-4 fw-bold"><span th:text="${activite.distanceTotaleKm}">0</span> km</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Délai moyen (création → fin)</div>
+            <div class="fs-4 fw-bold"><span th:text="${activite.delaiMoyenMinutes} ?: '-'">0</span> min</div></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Chauffeur le plus actif</div>
+            <div class="fw-bold" th:text="${activite.chauffeurLePlusActif} ?: '-'">-</div>
+            <small class="text-muted"><span th:text="${activite.missionsChauffeurLePlusActif}">0</span> missions</small></div></div>
+        <div class="col-6 col-md-3"><div class="card p-3"><div class="text-muted">Véhicule le plus utilisé</div>
+            <div class="fw-bold" th:text="${activite.vehiculeLePlusUtilise} ?: '-'">-</div>
+            <small class="text-muted"><span th:text="${activite.missionsVehiculeLePlusUtilise}">0</span> missions</small></div></div>
+    </div>
+</div>
+</body>
+</html>

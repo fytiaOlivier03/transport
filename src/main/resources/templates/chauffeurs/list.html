@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Chauffeurs')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Chauffeurs / livreurs</h3>
+        <a class="btn btn-primary" th:href="@{/chauffeurs/new}" sec:authorize="hasAnyRole('ADMIN','MANAGER')">+ Nouveau chauffeur</a>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/chauffeurs}">
+        <div class="col-md-3"><input class="form-control" name="q" th:value="${q}" placeholder="Nom, téléphone, permis..."></div>
+        <div class="col-md-2"><input class="form-control" name="zone" th:value="${zone}" placeholder="Zone"></div>
+        <div class="col-md-2">
+            <select class="form-select" name="statut">
+                <option value="">Tous statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}" th:selected="${s == statut}"></option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="sort">
+                <option value="id,desc" th:selected="${sort == 'id,desc'}">Plus récents</option>
+                <option value="nom,asc" th:selected="${sort == 'nom,asc'}">Nom A → Z</option>
+                <option value="nom,desc" th:selected="${sort == 'nom,desc'}">Nom Z → A</option>
+                <option value="dateExpirationPermis,asc" th:selected="${sort == 'dateExpirationPermis,asc'}">Permis expirant bientôt</option>
+            </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-outline-secondary w-100">Filtrer</button></div>
+    </form>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Nom</th><th>Téléphone</th><th>Permis</th><th>Zone</th><th>Véhicule</th><th>Statut</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${page.content}">
+                    <td th:text="${c.prenom + ' ' + c.nom}">Nom</td>
+                    <td th:text="${c.telephone}">Tel</td>
+                    <td>
+                        <span th:text="${c.numeroPermis}">P</span>
+                        <span class="badge bg-danger" th:unless="${c.permisValide}">expiré</span>
+                    </td>
+                    <td th:text="${c.zone} ?: '-'">Zone</td>
+                    <td th:text="${c.vehiculeImmatriculation} ?: '-'">V</td>
+                    <td><span th:replace="~{fragments/layout :: badge(${c.statut})}"></span></td>
+                    <td class="text-end">
+                        <form class="d-inline-flex gap-1" th:action="@{/chauffeurs/{id}/status(id=${c.id})}" method="post"
+                              sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">
+                            <select class="form-select form-select-sm" name="statut">
+                                <option th:each="s : ${statutsManuels}" th:value="${s}" th:text="${s}" th:selected="${s == c.statut}"></option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary">OK</button>
+                        </form>
+                        <span sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+                            <a class="btn btn-sm btn-outline-primary" th:href="@{/chauffeurs/{id}/edit(id=${c.id})}">Modifier</a>
+                            <form class="d-inline" th:action="@{/chauffeurs/{id}/delete(id=${c.id})}" method="post"
+                                  onsubmit="return confirm('Supprimer ce chauffeur ?');">
+                                <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
+                        </span>
+                    </td>
+                </tr>
+                <tr th:if="${page.empty}"><td colspan="7" class="text-center text-muted py-4">Aucun chauffeur</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="text-muted small mt-2"><span th:text="${page.totalElements}">0</span> résultat(s)</p>
+    <nav th:replace="~{fragments/layout :: pagination(${page}, '/chauffeurs', ${query})}"></nav>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

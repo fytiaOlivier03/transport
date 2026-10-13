@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Véhicules')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div class="container">
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Véhicules</h3>
+        <a class="btn btn-primary" th:href="@{/vehicules/new}" sec:authorize="hasAnyRole('ADMIN','MANAGER')">+ Nouveau véhicule</a>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/vehicules}">
+        <div class="col-md-4"><input class="form-control" name="q" th:value="${q}" placeholder="Immatriculation, marque, modèle..."></div>
+        <div class="col-md-3">
+            <select class="form-select" name="statut">
+                <option value="">Tous statuts</option>
+                <option th:each="s : ${statuts}" th:value="${s}" th:text="${s}" th:selected="${s == statut}"></option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="sort">
+                <option value="id,desc" th:selected="${sort == 'id,desc'}">Plus récents</option>
+                <option value="immatriculation,asc" th:selected="${sort == 'immatriculation,asc'}">Immatriculation A → Z</option>
+                <option value="kilometrage,desc" th:selected="${sort == 'kilometrage,desc'}">Kilométrage décroissant</option>
+            </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-outline-secondary w-100">Filtrer</button></div>
+    </form>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr><th>Immatriculation</th><th>Véhicule</th><th>Année</th><th>Places</th><th>Charge (kg)</th><th>Km</th><th>Statut</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="v : ${page.content}">
+                    <td th:text="${v.immatriculation}">Immat</td>
+                    <td th:text="${v.marque + ' ' + v.modele}">Modèle</td>
+                    <td th:text="${v.annee}">2020</td>
+                    <td th:text="${v.capacitePlaces}">4</td>
+                    <td th:text="${v.capaciteKg}">300</td>
+                    <td th:text="${#numbers.formatDecimal(v.kilometrage, 0, 'WHITESPACE', 0, 'POINT')}">0</td>
+                    <td><span th:replace="~{fragments/layout :: badge(${v.statut})}"></span></td>
+                    <td class="text-end">
+                        <form class="d-inline-flex gap-1" th:action="@{/vehicules/{id}/status(id=${v.id})}" method="post"
+                              sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">
+                            <select class="form-select form-select-sm" name="statut">
+                                <option th:each="s : ${statutsManuels}" th:value="${s}" th:text="${s}" th:selected="${s == v.statut}"></option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary">OK</button>
+                        </form>
+                        <span sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+                            <a class="btn btn-sm btn-outline-primary" th:href="@{/vehicules/{id}/edit(id=${v.id})}">Modifier</a>
+                            <form class="d-inline" th:action="@{/vehicules/{id}/delete(id=${v.id})}" method="post"
+                                  onsubmit="return confirm('Supprimer ce véhicule ?');">
+                                <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                            </form>
+                        </span>
+                    </td>
+                </tr>
+                <tr th:if="${page.empty}"><td colspan="8" class="text-center text-muted py-4">Aucun véhicule</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="text-muted small mt-2"><span th:text="${page.totalElements}">0</span> résultat(s)</p>
+    <nav th:replace="~{fragments/layout :: pagination(${page}, '/vehicules', ${query})}"></nav>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
